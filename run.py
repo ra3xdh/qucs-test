@@ -410,6 +410,9 @@ def parse_options():
     parser.add_argument('-mp', '--processes', nargs="?", default=1, type=int, metavar='NUM',
                        help='Use %(metavar)s processes to run the simulations (default: number of CPU cores).') # if no value is specified the default 'None' will be used
 
+    parser.add_argument('--ngspice', action='store_true',
+		       help='Use Ngspice as simulation backend instead of qucsator')
+
     args = parser.parse_args()
     return args
 
@@ -690,14 +693,22 @@ if __name__ == '__main__':
             # create reference netlist.txt
             input_sch  = os.path.join(dest_dir, sch)
             output_net = os.path.join(dest_dir,"netlist.txt")
+	    if args.ngspice :
+		    # HACK: it's need to reimplement sch2net
+		    output_net = output_net + " --ngspice"
+
             sch2net(input_sch, output_net, prefix[0])
 
             # create reference .dat, log.txt
             print pb("Creating reference data and log files.")
             output_dataset = get_sch_dataset(input_sch)
             output_dataset = os.path.join(dest_dir, output_dataset)
-            cmd = [os.path.join(prefix[0],"qucsator"), "-i", output_net, "-o", output_dataset]
-            print 'Running [qucsator]: ', ' '.join(cmd)
+	    if args.ngspice :
+                cmd = [os.path.join(prefix[0],"qucs"), "-n","-i", output_net, "-o", output_dataset,"--ngspice"]
+                print 'Running [ngspice from qucs]: ', ' '.join(cmd)
+            else:
+	        cmd = [os.path.join(prefix[0],"qucsator"), "-i", output_net, "-o", output_dataset]
+                print 'Running [qucsator]: ', ' '.join(cmd)
 
             # call the solver in a subprocess, set the timeout
             tic = time.time()
@@ -706,13 +717,14 @@ if __name__ == '__main__':
             toc = time.time()
             runtime = toc - tic
 
-            # save log.txt
-            # FIXME note that Qucs-gui adds a timestamp to the the log
-            #       running Qucsator it does not the same header/footer
-            logout = os.path.join(dest_dir,'log.txt')
-            #print pb('Initializing %s saving: \n   %s' %(sch, logout))
-            with open(logout, 'w') as myFile:
-                myFile.write(command.out)
+            if not args.ngspice:
+                # save log.txt
+                # FIXME note that Qucs-gui adds a timestamp to the the log
+                #       running Qucsator it does not the same header/footer
+                logout = os.path.join(dest_dir,'log.txt')
+                #print pb('Initializing %s saving: \n   %s' %(sch, logout))
+                with open(logout, 'w') as myFile:
+                    myFile.write(command.out)
 
             ## ready to test-fire, run.py and check --qucs, --qucsator
             ## reminder to add to repository
@@ -733,8 +745,13 @@ if __name__ == '__main__':
             projName = test.strip(os.sep)
             # get schematic name from direcitory name
             # trim the simulation types
-            sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_']
-            for sim in sim_types:
+            sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_','NG_']
+	    
+	    ngspice_run = False
+	    if 'NG_' in projName:
+		ngspice_run = True    
+            
+	    for sim in sim_types:
                 if sim in projName:
                     projName=projName[3:]
             projName = projName[:-4]
@@ -750,8 +767,13 @@ if __name__ == '__main__':
 
             # OVERWRITE reference .dat, log.txt
             print pb("Creating reference data and log files.")
-            cmd = [os.path.join(prefix[0],"qucsator"), "-i", output_net, "-o", output_dataset]
-            print 'Running [qucsator]: ', ' '.join(cmd)
+
+	    if not ngspice_run:
+                cmd = [os.path.join(prefix[0],"qucsator"), "-i", output_net, "-o", output_dataset]
+                print 'Running [qucsator]: ', ' '.join(cmd)
+	    else:
+                cmd = [os.path.join(prefix[0],"qucs"),"-n", "-i", input_sch, "-o", output_dataset,"--ngspice","--run"]
+                print 'Running [ngspice from qucs]: ', ' '.join(cmd)
 
             tic = time.time()
             # call the solver in a subprocess, set the timeout
@@ -760,12 +782,15 @@ if __name__ == '__main__':
             toc = time.time()
             runtime = toc - tic
 
-            # save log.txt
-            # FIXME log reports different details if release/debug mode
-            logout = os.path.join(dest_dir,'log.txt')
-            #print pb('Initializing %s saving: \n   %s' %(sch, logout))
-            with open(logout, 'w') as myFile:
-                myFile.write(command.out)
+            if not ngspice_run:
+		# save log.txt
+		# log is useless for Ngspice due to version differences
+		# we test only Qucs, not external simulators
+                # FIXME log reports different details if release/debug mode
+                logout = os.path.join(dest_dir,'log.txt')
+                #print pb('Initializing %s saving: \n   %s' %(sch, logout))
+                with open(logout, 'w') as myFile:
+                    myFile.write(command.out)
 
     # Print schematics contained in all (or selected) projects
     #
