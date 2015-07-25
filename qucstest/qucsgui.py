@@ -15,6 +15,7 @@ def get_qucs_version(prefix):
     :return: the version tag of qucsator
     '''
     cmd = [prefix + "qucs", "-v"]
+    print cmd
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     version = p.stdout.readlines()[0].strip()
     return version

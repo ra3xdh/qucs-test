@@ -545,9 +545,14 @@ if __name__ == '__main__':
             dest_dir = os.path.join('testsuite', test)
 
             projName = test.strip(os.sep)
+
+	    ngsp_flag = False
+            if 'NG_' in projName:
+		ngsp_flag = True
+
             # get schematic name from direcitory name
             # trim the simulation types
-            sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_']
+            sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_', 'NG_']
             for sim in sim_types:
                 if sim in projName:
                     projName=projName[3:]
@@ -568,7 +573,7 @@ if __name__ == '__main__':
 
             # go on to create a fresh test_netlist.txt
             test_net  = os.path.join(dest_dir, 'test_'+projName+'.txt')
-            sch2net(input_sch, test_net, prefix[0])
+            sch2net(input_sch, test_net, prefix[0], ngsp_flag)
 
             ref_netlist = os.path.join(dest_dir, 'netlist.txt')
 
