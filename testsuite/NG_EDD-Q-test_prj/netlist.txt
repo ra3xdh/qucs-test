@@ -1,0 +1,19 @@
+* Qucs 0.0.19  /home/vvk/qucs-test/testsuite/NG_EDD-Q-test_prj/EDD-Q-test.sch
+R1 _net0 out  1K
+V1 _net1 0 DC 1
+BD1I0 0 out I=0
+GD1Q0 0 out nD1Q0 out 1.0
+LD1Q0 nD1Q0 out 1.0
+BD1Q0 nD1Q0 out I=-(-(1e-6*(V(0)-V(out))+(0.5e-6*(V(0)-V(out))**2)/2+(0.2e-6*(V(0)-V(out))**3)/3))
+V2 _net1 _net0 DC 0 SIN(0 1 300 0 0) AC 1
+.control
+set filetype=ascii
+echo "" > spice4qucs.cir.noise
+AC LIN 200 1 10K 
+write EDD-Q-test_ac.txt v(out) 
+destroy all
+reset
+
+exit
+.endc
+.END

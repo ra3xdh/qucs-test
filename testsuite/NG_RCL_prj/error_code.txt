@@ -1,0 +1,2 @@
+Debug: *** try to load schematic : "/home/vvk/qucs-test/testsuite/NG_RCL_prj/netlist.txt" 
+Error: Could not load schematic /home/vvk/qucs-test/testsuite/NG_RCL_prj/netlist.txt
