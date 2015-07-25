@@ -84,7 +84,7 @@ class Test:
        if not self.schematic:
            # get schematic name from direcitory name
            # trim the simulation types
-           sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_']
+           sim_types= ['DC_', 'AC_', 'TR_', 'SP_', 'SW_','NG_']
            name = self.name
            for sim in sim_types:
                if sim in name:
@@ -230,7 +230,11 @@ def run_simulation(test, qucspath, plot_interactive=False):
     output_dataset = os.path.join(proj_dir, "test_"+test.dataset)
 
     ext = '' if os.name != 'nt' else '.exe'
-    cmd = [os.path.join(qucspath, "qucsator"+ext), "-i", input_net, "-o", output_dataset]
+    if 'NG_' in test.name :
+        cmd = [os.path.join(qucspath, "qucs"+ext),"-n", "-i", schematic, "-o", output_dataset,"--ngspice","--run"]
+    else:
+        cmd = [os.path.join(qucspath, "qucsator"+ext), "-i", input_net, "-o", output_dataset]
+
     print 'Running : ', ' '.join(cmd)
 
     # TODO run a few times, record average/best of 3
@@ -415,7 +419,8 @@ def parse_options():
                        help='Use %(metavar)s processes to run the simulations (default: number of CPU cores).') # if no value is specified the default 'None' will be used
 
     parser.add_argument('--ngspice', action='store_true',
-		       help='Use Ngspice as simulation backend instead of qucsator')
+		       help='Use Ngspice as simulation backend instead of qucsator\n'
+		            'Option has sense only with --reset and --add-test. Ignored otherwise.')
 
     args = parser.parse_args()
     return args
