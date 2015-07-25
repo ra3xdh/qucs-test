@@ -20,7 +20,7 @@ def get_qucs_version(prefix):
     return version
 
 
-def sch2net (input_sch, output_net, prefix):
+def sch2net (input_sch, output_net, prefix, ngspice = False):
     '''
     Convert sch to netlist.
     Run Qucs-GUI, convert schematic into netlist.
@@ -31,6 +31,9 @@ def sch2net (input_sch, output_net, prefix):
     '''
     print pb("Converting schematic to netlist.")
     cmd = [os.path.join(prefix,"qucs"), "-n", "-i", input_sch, "-o", output_net]
+    if ngspice:
+        cmd.append('--ngspice')
+
     print 'Running [qucs]: ', ' '.join(cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     retval = p.wait()

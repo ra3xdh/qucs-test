@@ -287,7 +287,7 @@ def run_simulation(test, qucspath, plot_interactive=False):
     return test
 
 
-def add_test_project(sch):
+def add_test_project(sch, flag_ngspice):
     '''
     Add a schematic file as a test on the testsuite.
 
@@ -311,13 +311,17 @@ def add_test_project(sch):
     # scan schematic for types of simulation [.DC, .AC, .TR, .SP, .SW]
     # create dir, concatenate simulation type(s), schematic name, append '_prj'
     # ex. TR_myCircuit_prj, DC_AC_TR_complexCircuit_prj
-    sim_used = get_sch_simulations(sch)
     sim_found = ''
-    for sim in sim_used:
-        #skip dot, prepend simulation types
-        sim_found+=sim[1:]+'_'
-    if not sim_found:
-        sys.exit( pr('This schematic performs no simulation, is it a subcircuit?'))
+    if not flag_ngspice :
+        sim_used = get_sch_simulations(sch)
+        for sim in sim_used:
+            #skip dot, prepend simulation types
+            sim_found+=sim[1:]+'_'
+        if not sim_found:
+            sys.exit( pr('This schematic performs no simulation, is it a subcircuit?'))
+    else:
+	sim_found = 'NG_'
+
     dest = sim_found + sch_name + '_prj'
 
     # scan for subcircuits, to be copied over to destination
@@ -688,23 +692,19 @@ if __name__ == '__main__':
         if os.path.exists(sch):
 
             # copy stuff into place
-            dest_dir = add_test_project(sch)
+            dest_dir = add_test_project(sch,args.ngspice)
 
             # create reference netlist.txt
             input_sch  = os.path.join(dest_dir, sch)
             output_net = os.path.join(dest_dir,"netlist.txt")
-	    if args.ngspice :
-		    # HACK: it's need to reimplement sch2net
-		    output_net = output_net + " --ngspice"
-
-            sch2net(input_sch, output_net, prefix[0])
+            sch2net(input_sch, output_net, prefix[0], args.ngspice)
 
             # create reference .dat, log.txt
             print pb("Creating reference data and log files.")
             output_dataset = get_sch_dataset(input_sch)
             output_dataset = os.path.join(dest_dir, output_dataset)
 	    if args.ngspice :
-                cmd = [os.path.join(prefix[0],"qucs"), "-n","-i", output_net, "-o", output_dataset,"--ngspice"]
+                cmd = [os.path.join(prefix[0],"qucs"), "-n","-i", input_sch, "-o", output_dataset,"--ngspice","--run"]
                 print 'Running [ngspice from qucs]: ', ' '.join(cmd)
             else:
 	        cmd = [os.path.join(prefix[0],"qucsator"), "-i", output_net, "-o", output_dataset]
