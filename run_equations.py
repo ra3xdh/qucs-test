@@ -587,7 +587,7 @@ if __name__ == '__main__':
             with open(inNet, 'w') as myTest:
                 myTest.write( net )
 
-            cmd = [os.path.join(prefix, "qucsator"), "-i", inNet, "-o", outDat]
+            cmd = [os.path.join(prefix, "qucsator_rf"), "-i", inNet, "-o", outDat]
             print('Running [qucsator]: ', ' '.join(cmd))
             retval = subprocess.call(cmd, stdout=open(os.devnull, "w"), stderr=subprocess.STDOUT)
 

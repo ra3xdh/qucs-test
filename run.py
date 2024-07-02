@@ -293,7 +293,7 @@ def run_simulation(test, qucspath, plot_interactive=False):
     output_dataset = os.path.join(proj_dir, "test_"+test.dataset)
 
     ext = '' if os.name != 'nt' else '.exe'
-    cmd = [os.path.join(qucspath, "qucsator"+ext), "-i", input_net, "-o", output_dataset]
+    cmd = [os.path.join(qucspath, "qucsator_rf"+ext), "-i", input_net, "-o", output_dataset]
     print('Running : ', ' '.join(cmd))
 
     # TODO run a few times, record average/best of 3
@@ -591,7 +591,7 @@ if __name__ == '__main__':
 
        if (args.qucsator or args.reset):
           ext = '' if os.name != 'nt' else '.exe'
-          if os.path.isfile(os.path.join(prefix, 'qucsator'+ext)):
+          if os.path.isfile(os.path.join(prefix, 'qucsator_rf'+ext)):
              print(pb('Found Qucsator in: %s' %(prefix)))
           else:
              sys.exit(pr('Oh dear, Qucsator not found in: %s' %(prefix)))
@@ -826,7 +826,7 @@ if __name__ == '__main__':
             print(pb("Creating reference data and log files."))
             output_dataset = get_sch_dataset(input_sch)
             output_dataset = os.path.join(dest_dir, output_dataset)
-            cmd = [os.path.join(prefix,"qucsator"), "-i", output_net, "-o", output_dataset]
+            cmd = [os.path.join(prefix,"qucsator_rf"), "-i", output_net, "-o", output_dataset]
             print('Running [qucsator]: ', ' '.join(cmd))
 
             # call the solver in a subprocess, set the timeout
@@ -880,7 +880,7 @@ if __name__ == '__main__':
 
             # OVERWRITE reference .dat, log.txt
             print(pb("Creating reference data and log files."))
-            cmd = [os.path.join(prefix,"qucsator"), "-i", output_net, "-o", output_dataset]
+            cmd = [os.path.join(prefix,"qucsator_rf"), "-i", output_net, "-o", output_dataset]
             print('Running [qucsator]: ', ' '.join(cmd))
 
             tic = time.time()
