@@ -25,7 +25,7 @@ import shutil
 import sys
 import threading
 import time
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 
 
 from qucstest.colors import pb, pg, pr, py
